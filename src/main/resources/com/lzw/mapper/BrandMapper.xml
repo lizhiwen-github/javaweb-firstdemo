@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lzw.mapper.BrandMapper">
+    <resultMap id="selectResultMap" type="brand">
+        <result column="brand_name" property="brandName"/>
+        <result column="company_name" property="companyName"/>
+    </resultMap>
+    <insert id="insertBrand">
+        insert into tb_brand(brand_name, company_name, ordered, description, status) VALUES
+        (#{brandName},#{companyName},#{ordered},#{description},#{status});
+    </insert>
+
+        <update id="updateBrand">
+            update tb_brand
+            <set>
+                <if test="brandName!=null and brandName!=''"> brand_name=#{brandName}, </if>
+                <if test="companyName!=null and companyName!=''"> company_name=#{companyName}, </if>
+                <if test="ordered!=null"> ordered=#{ordered}, </if>
+                <if test="description!=null and description!=''"> description=#{description}, </if>
+                <if test="status!=null"> status=#{status} </if>
+            </set>
+            where id=#{id};
+        </update>
+    <delete id="deleteByIds">
+        delete from tb_brand where  id in
+        <foreach collection="ids" item="id" separator="," open="(" close=")">
+            #{id}
+        </foreach>
+    </delete>
+    <delete id="deleteById">
+        delete from tb_brand where id=#{rowId}
+    </delete>
+    <select id="selectAll" resultMap="selectResultMap">
+        select * from tb_brand;
+    </select>
+    <select id="selectBrandCount" resultType="java.lang.Integer">
+        select count(*) from tb_brand;
+    </select>
+    <select id="selectByPage" resultMap="selectResultMap">
+        select * from tb_brand limit #{begin},#{size};
+    </select>
+    <select id="selectByPageAndCondition" resultMap="selectResultMap">
+        select * from tb_brand 
+       <where>
+           <if test="brand.brandName!=null and brand.brandName!=''">
+               and brand_name like #{brand.brandName}
+           </if>
+           <if test="brand.companyName!=null and brand.companyName!=''">
+               and company_name like #{brand.companyName}
+           </if>
+           <if test="brand.status!=null">
+               and status like #{brand.status}
+           </if>
+       </where>
+      limit #{begin},#{size};
+    </select>
+    <select id="selectTotalCountByCondotion" resultType="java.lang.Integer">
+        select count(*) from tb_brand
+        <where>
+            <if test="brandName!=null and  brandName!=''">
+                and brand_name like #{ brandName}
+            </if>
+            <if test="companyName!=null and companyName!=''">
+                and company_name like #{companyName}
+            </if>
+            <if test=" status!=null">
+                and status like #{ status}
+            </if>
+        </where>
+    </select>
+    <select id="selectById" resultMap="selectResultMap">
+        select *from tb_brand where id=#{rowId}
+    </select>
+</mapper>

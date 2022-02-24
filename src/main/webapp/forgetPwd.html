@@ -1,0 +1,118 @@
+ <!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8">
+  <title>忘记密码</title>
+  <link rel="stylesheet" href="./style.css">
+  <script src="./js/vue.js"></script>
+  <script src="./js/axios-0.18.0.js"></script>
+</head>
+<body>
+<!-- partial:index.partial.html -->
+<div class="login-box" id="app">
+  <h2>忘记密码</h2>
+    <!-- 此处异步显示登录失败的信息 -->
+    <span id="login_msg" class="msg">{{msg}}</span>
+  <div>
+    <div class="user-box">
+      <input type="text" v-model="name" @blur="nameIsExist">
+      <label>用户名</label>
+    </div>
+    <div class="user-box">
+      <input type="password" v-model="firstPwd">
+      <label>新密码</label>
+    </div>
+    <div class="user-box">
+        <input type="password" v-model="secondPwd" @blur="pwdIsRepeat">
+        <label>确认密码</label>
+      </div>
+    <a href="#" id="login" @click.prevent="forget_fun">
+      <span></span>
+      <span></span>
+      <span></span>
+      <span></span>
+      确定
+    </a>
+    <a id="login_reset" @click="reset_fun1">
+      <span></span>
+      <span></span>
+      <span></span>
+      <span></span>
+      重置
+    </a>
+  </div>
+</div>
+<!-- partial -->
+<script>
+  const vm=new Vue({
+    el:"#app",
+    data:{
+      msg:'',
+      name:'',
+      firstPwd:'',
+      secondPwd:''
+    },
+    methods:{
+      nameIsExist(){
+        let _this=this
+        //失去焦点进行判断用户名输入是否正确
+        axios({
+          method:'get',
+          url:'http://localhost:8080/finalBrandDemo/user/selectByUsernameForRorgetPwd',
+          params: {name:_this.name}
+        }).then(resp=>{
+          if(resp.data=="fail"){
+            _this.msg="用户名不存在"
+            _this.name=''
+          }else{
+            this.msg=''
+          }
+        })
+      },
+      pwdIsRepeat(){//输入第二次密码
+        if(this.firstPwd!=this.secondPwd){
+          //两次密码输入不一致
+          this.msg='两次密码输入不一致'
+          this.firstPwd=''
+          this.secondPwd=''
+        }else{
+          this.msg=''
+        }
+      },
+      reset_fun1(){//重置
+        this.msg=''
+        this.name=''
+        this.firstPwd=''
+        this.secondPwd=''
+      },
+      forget_fun(){//点击确定按钮
+        let _this=this
+        if(this.name==''){
+          this.msg='请填写用户名'
+        }else if(this.firstPwd==''||this.secondPwd==''){
+          this.msg='请填写新密码'
+        }else{
+          let user={
+            password:this.firstPwd,
+            username:this.name
+          }
+          axios({
+            method: 'post',
+            url:'http://localhost:8080/finalBrandDemo/user/updatePassword',
+            data: user
+          }).then(resp=>{
+            if(resp.data=="success"){
+              //跳转到登录页面
+              window.location.href="http://localhost:8080/finalBrandDemo/login.html"
+            }else{
+             _this.msg='修改密码失败'
+            }
+          })
+        }
+      }
+
+    }
+  })
+</script>
+</body>
+</html>

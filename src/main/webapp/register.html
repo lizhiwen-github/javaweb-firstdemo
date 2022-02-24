@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8">
+  <title>注册</title>
+  <link rel="stylesheet" href="./style.css">
+  <script src="./js/axios-0.18.0.js"></script>
+  <script src="./js/vue.js"></script>
+</head>
+<body>
+<!-- partial:index.partial.html -->
+<div id="app">
+<div class="login-box">
+  <h2>注册</h2>
+    <!-- 此处异步显示登录失败的信息 -->
+    <span id="login_msg" class="msg">{{msg}}</span>
+  <div>
+    <div class="user-box">
+      <input type="text" v-model.trim="user.username" name="" required="" @blur="nameJudge">
+      <label>用户名</label>
+    </div>
+    <div class="user-box">
+      <input type="password" v-model.trim="user.password" name="" required="">
+      <label>密码</label>
+    </div>
+    <div class="user-box" id="checkCode">
+      <input type="text" name="" required="" v-model.trim="code">
+      <label>验证码</label>
+      <img id="codeImage" :src="codeImage" @click="changeImageCode1">
+      <a id="changeImg" @click.prevent="changeImageCode2">看不清？</a>
+    </div>
+    <a id="login" @click.prevent="register_fun1">
+      <span></span>
+      <span></span>
+      <span></span>
+      <span></span>
+      注册
+    </a>
+    <a href="#" id="login_reset" @click.prevent="reg_reset">
+      <span></span>
+      <span></span>
+      <span></span>
+      <span></span>
+      重置
+    </a>
+  </div>
+</div>
+</div>
+<!-- partial -->
+<script>
+  const vm=new Vue({
+    el:"#app",
+    data:{
+      user:{
+        username:'',
+        password:''
+      },
+      msg:'',
+      codeImage:'',
+      code:''
+    },
+    methods:{
+      //用户名输入框中失去焦点时，触发该事件
+      nameJudge(){
+        alert("haha")
+        let _this=this
+        axios({
+          method:'get',
+          url:'http://localhost:8080/finalBrandDemo/user/selectByUsernameForRegister',
+          params:{username:_this.user.username}
+        }).then(resp=>{
+          if(resp.data=="此用户名已被注册"){
+            _this.msg="此用户名已被注册"
+            _this.user.username=''
+          }
+        })
+      },
+      changeImageCode1(){
+        this.codeImage="http://localhost:8080/finalBrandDemo/user/chackImageCode?"+new Date().getMilliseconds()
+      },
+      changeImageCode2(){
+        this.codeImage="http://localhost:8080/finalBrandDemo/user/chackImageCode?"+new Date().getMilliseconds()
+
+      },
+      reg_reset(){
+        this.msg=''
+        this.code=''
+        this.user.username=''
+        this.user.password=''
+      },
+      register_fun1(){//点击注册按钮，触发该事件
+        let _this=this
+        axios({
+          method: 'get',
+          url:'http://localhost:8080/finalBrandDemo/user/registerUser',
+          params: {
+            user:_this.user,
+            codeStr:_this.code
+          }
+        }).then(resp=>{
+          if(resp.data=="success"){
+            window.location.href="http://localhost:8080/finalBrandDemo/login.html"
+          }
+          if(resp.data=="验证码错误"){
+            _this.msg='验证码错误'
+            _this.code=''
+          }
+        })
+      }
+    },
+    beforeMount(){
+      this.codeImage="http://localhost:8080/finalBrandDemo/user/chackImageCode?"+new Date().getMilliseconds()
+    }
+  })
+</script>
+</body>
+</html>
